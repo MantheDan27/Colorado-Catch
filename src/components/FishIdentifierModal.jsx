@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 
 async function identifyFishWithClaude(imageBase64, apiKey) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -56,6 +57,9 @@ If you cannot identify a fish or the image doesn't contain a fish, respond:
   return JSON.parse(text)
 }
 
+// True when running inside a Capacitor native wrapper (Android/iOS)
+const isNative = () => !!(typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.())
+
 export default function FishIdentifierModal({ water, apiKey, onClose, onFishAdded }) {
   const [tab, setTab] = useState('upload') // 'upload' | 'camera'
   const [imageDataUrl, setImageDataUrl] = useState(null)
@@ -82,7 +86,39 @@ export default function FishIdentifierModal({ water, apiKey, onClose, onFishAdde
     reader.readAsDataURL(file)
   }
 
+  // Use Capacitor Camera plugin on native (Android/iOS), web APIs on browser/Electron
+  const captureNativePhoto = async (source) => {
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source,
+      })
+      setImageDataUrl(photo.dataUrl)
+      setResult(null)
+      setError(null)
+    } catch (e) {
+      const msg = e?.message || ''
+      if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('no image')) {
+        setError('Could not access camera. Please check permissions and try again.')
+      }
+    }
+  }
+
+  const handleUploadArea = async () => {
+    if (isNative()) {
+      await captureNativePhoto(CameraSource.Photos)
+      return
+    }
+    fileInputRef.current?.click()
+  }
+
   const startCamera = async () => {
+    if (isNative()) {
+      await captureNativePhoto(CameraSource.Camera)
+      return
+    }
     try {
       const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       setStream(s)
@@ -185,7 +221,7 @@ export default function FishIdentifierModal({ water, apiKey, onClose, onFishAdde
             <>
               <div
                 className={`upload-area ${imageDataUrl ? 'has-image' : ''}`}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleUploadArea}
               >
                 {imageDataUrl ? (
                   <img src={imageDataUrl} alt="Fish catch" />
@@ -193,19 +229,21 @@ export default function FishIdentifierModal({ water, apiKey, onClose, onFishAdde
                   <>
                     <div className="upload-icon">🎣</div>
                     <div className="upload-text">
-                      <strong>Click to upload a photo</strong>
+                      <strong>{isNative() ? 'Tap to choose from gallery' : 'Click to upload a photo'}</strong>
                       <p>JPG, PNG supported</p>
                     </div>
                   </>
                 )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
+              {!isNative() && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+              )}
             </>
           )}
 
@@ -215,6 +253,11 @@ export default function FishIdentifierModal({ water, apiKey, onClose, onFishAdde
               {imageDataUrl ? (
                 <div className="upload-area has-image" style={{ cursor: 'default' }}>
                   <img src={imageDataUrl} alt="Captured fish" />
+                </div>
+              ) : isNative() ? (
+                <div className="upload-area" onClick={startCamera}>
+                  <div className="upload-icon">📷</div>
+                  <div className="upload-text"><strong>Tap to open camera</strong></div>
                 </div>
               ) : stream ? (
                 <>

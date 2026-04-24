@@ -1,0 +1,13 @@
+{
+  "appId": "com.coloradocatch.app",
+  "appName": "Colorado Catch",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
