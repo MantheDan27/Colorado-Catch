@@ -368,11 +368,8 @@ video {
 .settings-section h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: #374151; }
 .settings-note { font-size: 0.78rem; color: var(--gray); margin-top: 4px; }
 
-/* Map marker tooltip override */
-.leaflet-popup-content-wrapper {
-  border-radius: 10px !important;
-  box-shadow: var(--shadow-lg) !important;
-}
+/* SVG map fills its container */
+#map, .map-svg { width: 100%; height: 100%; display: block; }
 
 /* Spinner */
 .spinner {
