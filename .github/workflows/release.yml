@@ -2,8 +2,13 @@ name: Build & Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       tag:
@@ -29,6 +34,7 @@ jobs:
         run: npx cross-env ELECTRON=true npx vite build && npx electron-builder --publish never
 
       - name: Upload .exe to release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         shell: pwsh
         run: |
           $tag = "${{ github.event.inputs.tag || github.ref_name }}"
@@ -65,6 +71,7 @@ jobs:
         run: cp android/app/build/outputs/apk/debug/app-debug.apk "Colorado-Catch.apk"
 
       - name: Upload APK to release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           gh release upload "$TAG" "Colorado-Catch.apk" --clobber
