@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Build Windows installer
-        run: npm run electron:build
+        run: npx cross-env ELECTRON=true npx vite build && npx electron-builder --publish never
 
       - name: Upload .exe to release
         shell: pwsh
@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - uses: actions/setup-java@v4
