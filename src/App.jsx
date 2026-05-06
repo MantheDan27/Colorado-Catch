@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import ColoradoMap from './components/ColoradoMap'
-import WaterPanel from './components/WaterPanel'
+import LeaderboardPage from './components/LeaderboardPage'
 import SettingsModal from './components/SettingsModal'
 
 function useLocalStorage(key, initial) {
@@ -40,13 +40,29 @@ export default function App() {
     }))
   }, [setCatches])
 
-  const handleSaveApiKey = useCallback((key) => {
-    setApiKey(key)
-  }, [setApiKey])
+  if (selectedWater) {
+    return (
+      <div className="app">
+        <LeaderboardPage
+          water={selectedWater}
+          catches={catches}
+          onFishAdded={handleFishAdded}
+          onBack={() => setSelectedWater(null)}
+          apiKey={apiKey}
+        />
+        {showSettings && (
+          <SettingsModal
+            apiKey={apiKey}
+            onSave={setApiKey}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="header">
         <div className="header-logo">
           <span>🎣</span>
@@ -65,35 +81,18 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main */}
-      <div className="main">
-        <div className="map-container">
-          <ColoradoMap
-            catches={catches}
-            onSelectWater={setSelectedWater}
-            selectedWater={selectedWater}
-          />
-        </div>
-
-        {/* Side panel */}
-        <div className={`side-panel ${selectedWater ? '' : 'closed'}`} style={{ position: 'relative' }}>
-          {selectedWater && (
-            <WaterPanel
-              water={selectedWater}
-              catches={catches}
-              onFishAdded={handleFishAdded}
-              onClose={() => setSelectedWater(null)}
-              apiKey={apiKey}
-            />
-          )}
-        </div>
+      <div className="map-full">
+        <ColoradoMap
+          catches={catches}
+          onSelectWater={setSelectedWater}
+          selectedWater={null}
+        />
       </div>
 
-      {/* Settings modal */}
       {showSettings && (
         <SettingsModal
           apiKey={apiKey}
-          onSave={handleSaveApiKey}
+          onSave={setApiKey}
           onClose={() => setShowSettings(false)}
         />
       )}

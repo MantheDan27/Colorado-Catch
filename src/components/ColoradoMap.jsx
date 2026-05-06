@@ -197,7 +197,7 @@ export default function ColoradoMap({ catches, onSelectWater, selectedWater }) {
                 {shortName}
               </text>
 
-              <title>{water.name} · {water.type} · {water.area} · {catchCount} catch{catchCount !== 1 ? 'es' : ''} logged</title>
+              <title>{water.name} · {water.type} · {water.area} · {catchCount} catch{catchCount !== 1 ? 'es' : ''} logged — click to view leaderboard</title>
             </g>
           )
         })}
@@ -223,7 +223,7 @@ export default function ColoradoMap({ catches, onSelectWater, selectedWater }) {
         <g transform="translate(540, 398)">
           <rect x="-4" y="-14" width="162" height="44" rx="6" fill="white" opacity="0.75" />
           <ellipse cx="10" cy="0" rx="11" ry="7" fill="#3b82f6" stroke="#dbeafe" strokeWidth="1" />
-          <text x="28" y="4" fontSize="9" fill="#1e3a5f" fontWeight="600">Water body — click to open</text>
+          <text x="28" y="4" fontSize="9" fill="#1e3a5f" fontWeight="600">Water body — click for leaderboard</text>
           <circle cx="10" cy="20" r="6" fill="#dc2626" />
           <text x="10" y="24" textAnchor="middle" fontSize="7" fill="white" fontWeight="bold">3</text>
           <text x="28" y="24" fontSize="9" fill="#1e3a5f" fontWeight="600">Number of catches logged</text>
